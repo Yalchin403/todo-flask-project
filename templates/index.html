@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Todo</title>
+{% endblock %}
+
+{% block body %}
+<br>
+<h3><a href="/create-task">Create new task</a><br><br></h3>
+<div class="container">
+    {% for task in all_tasks %}
+        <h4>{{task.title}}</h4>
+            &emsp;{{task.content}}<br>
+            &emsp;&ensp;<a href="/edit/{{task.id}}"><button type="submit" class="btn btn-primary">Edit</button></a>
+            <a href="/delete/{{task.id}}"> <button type="submit" class="btn btn-primary">Delete</button></a> <br> <br>
+  
+
+
+    {% endfor %}
+
+</div>
+{% endblock %}
