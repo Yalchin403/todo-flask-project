@@ -1,27 +1,6 @@
-#!/usr/bin/env python
-import os
-from flask import Flask, render_template, url_for, request, redirect
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from flask_wtf.csrf import CsrfProtect
-
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-db = SQLAlchemy(app)
-
-class Todo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), nullable=False)
-    content = db.Column(db.String(200), nullable=False)
-    completed = db.Column(db.Integer, default=0)
-    created_date = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return '<Task %r>' % self.title
-     
-
+from flask import render_template, url_for, request, redirect
+from todo.models import Todo
+from todo import app, db
 
 @app.route('/', methods=['GET',])
 def index():
@@ -74,5 +53,3 @@ def edit_task(id):
         return redirect('/')
     except:
         return "There was an error while updating the task..."
-if __name__ == '__main__':
-    app.run(debug=True)
