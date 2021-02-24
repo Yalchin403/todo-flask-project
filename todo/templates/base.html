@@ -17,6 +17,13 @@
         <div class="navbar-nav ml-auto">
 
           <a class="nav-item nav-link" href="/about">About</a>
+          {% if current_user.is_authenticated %}
+          <a class="nav-item nav-link" href="/account">{{current_user.username}}</a>
+          <a class="nav-item nav-link" href="/logout">Logout</a>
+          {% else %}
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/register">Register</a>
+          {% endif %}
         </div>
       </div>
     </nav>
@@ -28,7 +35,7 @@
 
   <section class="jumbotron">
 <div class="container">
-  {% block body %}
+  {% block content %}
 </div>
 </section>
 </main>
