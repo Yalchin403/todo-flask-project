@@ -1,9 +1,10 @@
+import secrets, os
 from flask import render_template, url_for, request, redirect, flash
 from todo.models import Todo, User
 from todo import app, db, bcrypt
-from todo.forms import RegistrationForm, LoginForm
+from todo.forms import RegistrationForm, LoginForm, UpdateAccountForm,RequestResetForm, ResetPasswordForm
 from flask_login import login_user, current_user, logout_user, login_required
-
+from PIL import Image
 @app.route('/', methods=['GET',])
 @login_required
 def index():
@@ -126,10 +127,50 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+def save_pp_pic(raw_image):
+    gen_id = secrets.token_hex(8)
+    file_name, file_ext = os.path.splitext(raw_image.filename)
+    picture_name = gen_id + file_ext
+    absolute_path = os.path.join(app.root_path, 'static/photos', picture_name)
+    resize = (125, 125)
+    img = Image.open(raw_image)
+    img.thumbnail(resize)
+    img.save(absolute_path)
+    return picture_name
 
-@app.route("/account")
+
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
-    return render_template('account.html', title='Account')
-
+    form = UpdateAccountForm()
+    user_image = url_for('static', filename = f'photos/{current_user.image_file}')
+    if request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        return render_template('account.html', title='Account', user_image=user_image, form=form)
     
+    if form.validate_on_submit():
+        if form.image.data:
+            image = save_pp_pic(form.image.data)
+            current_user.image_file = image
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        return redirect(url_for('account'))
+    return render_template('account.html', title='Account', user_image=user_image, form=form)
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RequestResetForm()
+    if request.method == 'GET':
+        return render_template('reset_request.html', titlle='Resest Password', form=form)
+
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def new_pass(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if request.method == 'GET':
+        return render_template('.html', titlle='Resest Password', form=form) # change the name of template
